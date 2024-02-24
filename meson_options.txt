@@ -1,0 +1,1 @@
+option('layershell', type: 'feature', value: 'auto')
