@@ -30,7 +30,7 @@ struct Window {
 
 struct Window *create_window(GdkMonitor *monitor);
 void window_configure(struct Window *win);
-void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error);
+//void window_setup_input_box(struct Window *ctx, enum QuestionType type, char* question, char* error);
 void window_update_clock(struct Window *ctx);
 void window_swap_focus(struct Window *win, struct Window *old);
 

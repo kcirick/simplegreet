@@ -7,7 +7,6 @@
 struct SimpleGreeter *greeter = NULL;
 
 static char* command = NULL;
-static char* background = NULL;
 static char* style = NULL;
 
 #ifdef LAYER_SHELL
@@ -19,7 +18,6 @@ static GOptionEntry entries[] = {
   { "layer-shell", 'l', 0, G_OPTION_ARG_NONE, &use_layer_shell, "Use layer shell", NULL},
 #endif
   { "command", 'c', 0, G_OPTION_ARG_STRING, &command, "Command to run", "sway"},
-  { "background", 'b', 0, G_OPTION_ARG_STRING, &background, "Background image to use", NULL},
   { "style", 's', 0, G_OPTION_ARG_FILENAME, &style, "CSS style to use", NULL },
   { NULL }
 };
@@ -139,13 +137,7 @@ main (int argc, char **argv)
    greeter->use_layer_shell = use_layer_shell;
 #endif
    greeter->command = command;
-
-   if (background != NULL) {
-      greeter->background = gdk_pixbuf_new_from_file(background, &error);
-      if (greeter->background == NULL)
-         g_print("background loading failed: %s\n", error->message);
-   }
-
+   
    if (style != NULL) 
       attach_custom_style(style);
 

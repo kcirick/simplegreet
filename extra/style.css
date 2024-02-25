@@ -1,9 +1,13 @@
 window {
    background-color: #222222;
+   /* to use background image:
+   background-image: url("file:///etc/greetd/background.png");
+   background-size: cover;
+   */
 }
 
 #top_box {
-   background-color: #111111;
+   background-color: rgba(25, 25, 25, 0.75);
 }
 #clock_label {
    color: #999999;
@@ -20,5 +24,7 @@ window {
    padding: 50px;
    color: #999999;
 
+   /* position the input-box */
    margin-top: 100px;
+   margin-left: 200px;
 }

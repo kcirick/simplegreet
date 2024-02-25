@@ -17,7 +17,6 @@ struct Window;
 struct SimpleGreeter {
    GtkApplication *app;
    GArray *windows;
-   GdkPixbuf *background;
 
    struct Window *focused_window;
    guint draw_clock_source;
@@ -37,6 +36,8 @@ struct SimpleGreeter {
 
 extern struct SimpleGreeter *greeter;
 
+static inline char* greeter_get_initial_question() { return "Username: "; }
+
 struct Window* greeter_window_by_widget(struct SimpleGreeter *greeter, GtkWidget *window);
 struct Window* greeter_window_by_monitor(struct SimpleGreeter *greeter, GdkMonitor *monitor);
 void greeter_remove_window_by_widget(struct SimpleGreeter *greeter, GtkWidget *widget);
@@ -46,6 +47,5 @@ void greeter_update_clocks(struct SimpleGreeter *greeter);
 struct SimpleGreeter* create_greeter();
 void greeter_activate(struct SimpleGreeter *greeter);
 void greeter_destroy(struct SimpleGreeter *greeter);
-char* greeter_get_initial_question();
 
 #endif

@@ -1,5 +1,3 @@
-#define _POSIX_C_SOURCE 200809L
-
 #include <json-c/json_object.h>
 #include <json-c/json_tokener.h>
 
@@ -9,8 +7,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-
-#include <glib/gi18n.h>
 
 #include "proto.h"
 #include "window.h"
