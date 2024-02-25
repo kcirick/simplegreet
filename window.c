@@ -3,7 +3,7 @@
 
 #include <gtk/gtk.h>
 #ifdef LAYER_SHELL
-#include <gtk-layer-shell.h>
+#include<gtk-layer-shell.h>
 #endif
 
 #include "proto.h"
@@ -24,7 +24,7 @@ window_set_focus_layer_shell(struct Window *win, struct Window *old)
 }
 
 static gboolean 
-window_enter_notify(GtkWidget *widget, gpointer data) 
+window_enter_notify(GtkWidget *widget, gpointer data)
 {
    struct Window *win = greeter_window_by_widget(greeter, widget);
    greeter_focus_window(greeter, win);
@@ -58,13 +58,16 @@ window_update_clock(struct Window *ctx)
     gtk_label_set_markup((GtkLabel*)ctx->clock_label, greeter->time);
 }
 
-static void 
-window_setup_body(struct Window *ctx, char* error) 
+void 
+window_setup_body(struct Window *ctx, enum QuestionType type, char* question, char* error) 
 {
    if (greeter->focused_window != NULL && ctx != greeter->focused_window) 
       return;
 
    if (ctx->input_box != NULL) {
+      //if (gtkgreet->question_cnt == ctx->question_cnt)
+      //   return;
+
       gtk_widget_destroy(ctx->input_box);
       ctx->input_box = NULL;
 
@@ -75,7 +78,7 @@ window_setup_body(struct Window *ctx, char* error)
    }
 
    ctx->input_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-
+   
    // User name
    GtkWidget *username_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
    gtk_widget_set_halign(username_box, GTK_ALIGN_END);
@@ -89,25 +92,28 @@ window_setup_body(struct Window *ctx, char* error)
    gtk_widget_set_size_request(ctx->username_field, 350, -1);
    gtk_widget_set_halign(ctx->username_field, GTK_ALIGN_END);
    gtk_container_add(GTK_CONTAINER(username_box), ctx->username_field);
+   
+   gtk_container_add(GTK_CONTAINER(ctx->input_box), username_box);
 
    // Password
-   GtkWidget *password_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-   gtk_widget_set_halign(password_box, GTK_ALIGN_END);
-   GtkWidget *password_label = gtk_label_new("Password: ");
-   gtk_widget_set_halign(password_label, GTK_ALIGN_END);
-   gtk_container_add(GTK_CONTAINER(password_box), password_label);
+   if(type == QuestionTypeSecret) { 
+      GtkWidget *password_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+      gtk_widget_set_halign(password_box, GTK_ALIGN_END);
+      GtkWidget *password_label = gtk_label_new("Password: ");
+      gtk_widget_set_halign(password_label, GTK_ALIGN_END);
+      gtk_container_add(GTK_CONTAINER(password_box), password_label);
 
-   ctx->password_field = gtk_entry_new();
-   gtk_widget_set_name(ctx->password_field, "password_field");
-   gtk_entry_set_input_purpose((GtkEntry*)ctx->password_field, GTK_INPUT_PURPOSE_PASSWORD);
-   gtk_entry_set_visibility((GtkEntry*)ctx->password_field, FALSE);
-   g_signal_connect(ctx->password_field, "activate", G_CALLBACK(action_answer_question), ctx);
-   gtk_widget_set_size_request(ctx->password_field, 350, -1);
-   gtk_widget_set_halign(ctx->password_field, GTK_ALIGN_END);
-   gtk_container_add(GTK_CONTAINER(password_box), ctx->password_field);
+      ctx->password_field = gtk_entry_new();
+      gtk_widget_set_name(ctx->password_field, "password_field");
+      gtk_entry_set_input_purpose((GtkEntry*)ctx->password_field, GTK_INPUT_PURPOSE_PASSWORD);
+      gtk_entry_set_visibility((GtkEntry*)ctx->password_field, FALSE);
+      g_signal_connect(ctx->password_field, "activate", G_CALLBACK(action_answer_question), ctx);
+      gtk_widget_set_size_request(ctx->password_field, 350, -1);
+      gtk_widget_set_halign(ctx->password_field, GTK_ALIGN_END);
+      gtk_container_add(GTK_CONTAINER(password_box), ctx->password_field);
 
-   gtk_container_add(GTK_CONTAINER(ctx->input_box), username_box);
-   gtk_container_add(GTK_CONTAINER(ctx->input_box), password_box);
+      gtk_container_add(GTK_CONTAINER(ctx->input_box), password_box);
+   }
 
    gtk_container_add(GTK_CONTAINER(ctx->body_box), ctx->input_box);
 
@@ -117,7 +123,7 @@ window_setup_body(struct Window *ctx, char* error)
    gtk_widget_set_halign(button_box, GTK_ALIGN_END);
    gtk_container_add(GTK_CONTAINER(ctx->input_box), button_box);
 
-   // error message
+   // Error message
    if (error != NULL) {
       GtkWidget *label = gtk_label_new(error);
       char err[128];
@@ -127,10 +133,19 @@ window_setup_body(struct Window *ctx, char* error)
       gtk_container_add(GTK_CONTAINER(button_box), label);
    }
 
-   //GtkWidget *cancel_button = gtk_button_new_with_label("Cancel");
-   //gtk_widget_set_halign(cancel_button, GTK_ALIGN_END);
-   //gtk_container_add(GTK_CONTAINER(button_box), cancel_button);
-   //g_signal_connect(cancel_button, "clicked", G_CALLBACK(action_cancel_question), ctx);
+   switch (type) {
+      case QuestionTypeVisible:
+      case QuestionTypeSecret:
+      case QuestionTypeInfo:
+      case QuestionTypeError: 
+         GtkWidget *cancel_button = gtk_button_new_with_label("Cancel");
+         gtk_widget_set_halign(cancel_button, GTK_ALIGN_END);
+         gtk_container_add(GTK_CONTAINER(button_box), cancel_button);
+         g_signal_connect(cancel_button, "clicked", G_CALLBACK(action_cancel_question), ctx);
+         break;
+      case QuestionTypeInitial:
+         break;
+   }
 
    GtkWidget *continue_button = gtk_button_new_with_label("Log in");
    g_signal_connect(continue_button, "clicked", G_CALLBACK(action_answer_question), ctx);
@@ -141,13 +156,12 @@ window_setup_body(struct Window *ctx, char* error)
    gtk_container_add(GTK_CONTAINER(button_box), continue_button);
 
    gtk_widget_show_all(ctx->window);
-   gtk_widget_grab_focus(ctx->username_field);
+   gtk_widget_grab_focus(ctx->password_field);
 }
 
 static void
 window_setup_top_box(struct Window *ctx)
 {
-
    // Power label
    ctx->power_label = gtk_label_new("F1 - Power Off / F2 - Reboot");
    gtk_widget_set_name(ctx->power_label, "power_label");
@@ -177,21 +191,21 @@ window_setup_top_box(struct Window *ctx)
    gtk_entry_set_placeholder_text((GtkEntry*)selector_entry, "Command to run on login");
 
    gtk_box_pack_end(GTK_BOX(ctx->top_box), ctx->command_selector, TRUE, TRUE, 0);
-
 }
 
+
 static void 
-window_empty(struct Window *ctx) 
+window_empty(struct Window *ctx)
 {
-   ctx->window_box = NULL;
-   ctx->clock_label = NULL;
-   ctx->power_label = NULL;
-   ctx->body_box = NULL;
-   ctx->input_box = NULL;
-   ctx->username_field = NULL;
-   ctx->password_field = NULL;
-   ctx->command_selector = NULL;
-   ctx->top_box = NULL;
+    ctx->window_box = NULL;
+    ctx->clock_label = NULL;
+    ctx->power_label = NULL;
+    ctx->body_box = NULL;
+    ctx->input_box = NULL;
+    ctx->username_field = NULL;
+    ctx->password_field = NULL;
+    ctx->command_selector = NULL;
+    ctx->top_box = NULL;
 }
 
 static void 
@@ -205,27 +219,40 @@ window_setup(struct Window *ctx)
    }
 
    if (ctx->top_box == NULL) {
-      ctx->top_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+      ctx->top_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+      gtk_widget_set_name(ctx->top_box, "top_box");
       gtk_widget_set_valign(ctx->top_box, GTK_ALIGN_START);
       gtk_widget_set_halign(ctx->top_box, GTK_ALIGN_FILL);
       gtk_widget_set_hexpand(ctx->top_box, TRUE);
-      gtk_widget_set_name(ctx->top_box, "top_box");
+      //g_object_set(ctx->clock_label, "margin-bottom", 50, NULL);
       gtk_container_add(GTK_CONTAINER(ctx->window_box), ctx->top_box);
-      //gtk_box_pack_start(GTK_CONTAINER(ctx->window_box), ctx->top_box, TRUE, TRUE, 0);
 
       window_setup_top_box(ctx);
    }
 
-   if (ctx->body_box == NULL) {
-      ctx->body_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-      gtk_widget_set_halign(ctx->body_box, GTK_ALIGN_START);
-      gtk_widget_set_valign(ctx->body_box, GTK_ALIGN_START);
-      gtk_widget_set_name(ctx->body_box, "body_box");
-      gtk_widget_set_size_request(ctx->body_box, 384, -1);
-      gtk_container_add(GTK_CONTAINER(ctx->window_box), ctx->body_box);
+   // Update input area if necessary
+   if (greeter->focused_window == ctx || greeter->focused_window == NULL) {
+      if (ctx->body_box == NULL) {
+         ctx->body_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+         gtk_widget_set_halign(ctx->body_box, GTK_ALIGN_CENTER);
+         gtk_widget_set_valign(ctx->body_box, GTK_ALIGN_CENTER);
+         gtk_widget_set_name(ctx->body_box, "body_box");
+         gtk_widget_set_size_request(ctx->body_box, 384, -1);
+         gtk_container_add(GTK_CONTAINER(ctx->window_box), ctx->body_box);
+         window_update_clock(ctx);
+      }
+      window_setup_body(ctx, greeter->question_type, greeter->question, greeter->error);
+   } else if (ctx->body_box != NULL) {
+      gtk_widget_destroy(ctx->body_box);
+      ctx->body_box = NULL;
+      ctx->input_box = NULL;
+      ctx->username_field = NULL;
+      ctx->password_field = NULL;
+      ctx->command_selector = NULL;
+      window_update_clock(ctx);
    }
-   window_setup_body(ctx, greeter->error);
-   
+
+   //ctx->question_cnt = gtkgreet->question_cnt;
 }
 
 static void 
@@ -258,14 +285,13 @@ window_set_focus(struct Window *win, struct Window *old)
    gtk_widget_show_all(win->window);
 }
 
-void 
+void
 window_swap_focus(struct Window *win, struct Window *old) 
 {
 #ifdef LAYER_SHELL
-   if (greeter->use_layer_shell) 
+   if (greeter->use_layer_shell)
       window_set_focus_layer_shell(win, old);
 #endif
-
    window_set_focus(win, old);
 }
 
@@ -273,7 +299,7 @@ void
 window_configure(struct Window *w) 
 {
 #ifdef LAYER_SHELL
-   if (greeter->use_layer_shell) 
+   if (greeter->use_layer_shell)
       window_setup_layershell(w);
 #endif
 
@@ -290,7 +316,7 @@ window_destroy_notify(GtkWidget *widget, gpointer data)
 }
 
 static gboolean 
-window_background_notify(GtkWidget *widget, cairo_t *cr, gpointer data) 
+window_background(GtkWidget *widget, cairo_t *cr, gpointer data) 
 {
    gdk_cairo_set_source_pixbuf(cr, greeter->background, 0, 0);
    cairo_paint(cr);
@@ -316,8 +342,7 @@ create_window(GdkMonitor *monitor)
 
    if (greeter->background != NULL) {
       gtk_widget_set_app_paintable(w->window, TRUE);
-      g_signal_connect(w->window, "draw", G_CALLBACK(window_background_notify), NULL);
+      g_signal_connect(w->window, "draw", G_CALLBACK(window_background), NULL);
    }
-
    return w;
 }
