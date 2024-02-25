@@ -65,7 +65,7 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
 
         // Children of the box
         ctx->input_field = NULL;
-        ctx->command_selector = NULL;
+        //ctx->command_selector = NULL;
     }
     ctx->input_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *question_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
@@ -100,22 +100,6 @@ void window_setup_question(struct Window *ctx, enum QuestionType type, char* que
     }
 
     gtk_container_add(GTK_CONTAINER(ctx->input_box), question_box);
-
-   /*
-    if (type == QuestionTypeInitial) {
-        ctx->command_selector = gtk_combo_box_text_new_with_entry();
-        gtk_widget_set_name(ctx->command_selector, "command-selector");
-        gtk_widget_set_size_request(ctx->command_selector, 384, -1);
-        //config_update_command_selector(ctx->command_selector);
-        gtk_widget_set_halign(ctx->command_selector, GTK_ALIGN_END);
-        gtk_combo_box_set_active((GtkComboBox*)ctx->command_selector, 0);
-
-        GtkWidget *selector_entry = gtk_bin_get_child((GtkBin*)ctx->command_selector);
-        gtk_entry_set_placeholder_text((GtkEntry*)selector_entry, "Command to run on login");
-        g_signal_connect(selector_entry, "activate", G_CALLBACK(action_answer_question), ctx);
-
-        gtk_container_add(GTK_CONTAINER(ctx->input_box), ctx->command_selector);
-    }*/
 
     gtk_container_add(GTK_CONTAINER(ctx->body_box), ctx->input_box);
 
@@ -198,7 +182,6 @@ window_setup_top_box(struct Window *ctx)
 
 }
 
-
 static void window_empty(struct Window *ctx) {
     ctx->window_box = NULL;
     ctx->clock_label = NULL;
@@ -245,7 +228,7 @@ static void window_setup(struct Window *ctx) {
         ctx->body_box = NULL;
         ctx->input_box = NULL;
         ctx->input_field = NULL;
-        ctx->command_selector = NULL;
+        //ctx->command_selector = NULL;
         window_update_clock(ctx);
     }
 

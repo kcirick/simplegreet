@@ -9,95 +9,78 @@
 #include "window.h"
 
 static void handle_response(struct response resp, int start_req) {
+   struct request req;
    switch (resp.response_type) {
-      case response_type_success: {
-                                     if (start_req) {
-                                        exit(0);
-                                     }
-                                     struct request req = {
-                                        .request_type = request_type_start_session,
-                                     };
-                                     strncpy(req.body.request_start_session.cmd, greeter->selected_command, 127);
-                                     handle_response(roundtrip(req), 1);
-                                     break;
-                                  }
-      case response_type_auth_message: {
-                                          if (start_req) {
-                                             struct request req = {
-                                                .request_type = request_type_cancel_session,
-                                             };
-                                             roundtrip(req);
+      case response_type_success: 
+         if (start_req) exit(0);
 
-                                             char *error = "Unexpected auth question";
-                                             greeter_setup_question(greeter, QuestionTypeInitial, greeter_get_initial_question(), error);
-                                             break;
-                                          }
+         req.request_type = request_type_start_session;
+         strncpy(req.body.request_start_session.cmd, greeter->selected_command, 127);
+         handle_response(roundtrip(req), 1);
+         break;
+      case response_type_auth_message: 
+         if (start_req) {
+            req.request_type = request_type_cancel_session;
+            roundtrip(req);
 
-                                          greeter_setup_question(greeter,
-                                                (enum QuestionType)resp.body.response_auth_message.auth_message_type,
-                                                resp.body.response_auth_message.auth_message,
-                                                NULL);
-                                          break;
-                                       }
+            char *error = "Unexpected auth question";
+            greeter_setup_question(greeter, QuestionTypeInitial, greeter_get_initial_question(), error);
+            break;
+         }
+
+         greeter_setup_question(greeter,
+               (enum QuestionType)resp.body.response_auth_message.auth_message_type,
+               resp.body.response_auth_message.auth_message,
+               NULL);
+         break;
       case response_type_roundtrip_error:
-      case response_type_error: {
-                                   struct request req = {
-                                      .request_type = request_type_cancel_session,
-                                   };
-                                   roundtrip(req);
+      case response_type_error: 
+         req.request_type = request_type_cancel_session;
+         roundtrip(req);
 
-                                   char* error = NULL;
-                                   if (resp.response_type == response_type_error &&
-                                         resp.body.response_error.error_type == error_type_auth) {
-                                      error = "Login failed";
-                                   } else {
-                                      error = resp.body.response_error.description;
-                                   }
-                                   greeter_setup_question(greeter, QuestionTypeInitial, greeter_get_initial_question(), error);
-                                   break;
-                                }
+         char* error = NULL;
+         if (resp.response_type == response_type_error &&
+               resp.body.response_error.error_type == error_type_auth) {
+            error = "Login failed";
+         } else {
+            error = resp.body.response_error.description;
+         }
+         greeter_setup_question(greeter, QuestionTypeInitial, greeter_get_initial_question(), error);
+         break;
    }
 }
 
 void action_answer_question(GtkWidget *widget, gpointer data) {
    struct Window *ctx = data;
+   struct request req;
    switch (greeter->question_type) {
-      case QuestionTypeInitial: {
-                                   if (greeter->selected_command) {
-                                      free(greeter->selected_command);
-                                      greeter->selected_command = NULL;
-                                   }
-                                   greeter->selected_command = strdup(gtk_combo_box_text_get_active_text((GtkComboBoxText*)ctx->command_selector));
+      case QuestionTypeInitial: 
+         if (greeter->selected_command) {
+            free(greeter->selected_command);
+            greeter->selected_command = NULL;
+         }
+         greeter->selected_command = g_strdup(gtk_combo_box_text_get_active_text((GtkComboBoxText*)ctx->command_selector));
 
-                                   struct request req = {
-                                      .request_type = request_type_create_session,
-                                   };
-                                   if (ctx->input_field != NULL) {
-                                      strncpy(req.body.request_create_session.username, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
-                                   }
-                                   handle_response(roundtrip(req), 0);
-                                   break;
-                                }
+         req.request_type = request_type_create_session;
+         if (ctx->input_field != NULL) {
+            strncpy(req.body.request_create_session.username, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
+         }
+         handle_response(roundtrip(req), 0);
+         break;
       case QuestionTypeSecret:
-      case QuestionTypeVisible: {
-                                   struct request req = {
-                                      .request_type = request_type_post_auth_message_response,
-                                   };
-                                   if (ctx->input_field != NULL) {
-                                      strncpy(req.body.request_post_auth_message_response.response, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
-                                   }
-                                   handle_response(roundtrip(req), 0);
-                                   break;
-                                }
+      case QuestionTypeVisible: 
+         req.request_type = request_type_post_auth_message_response;
+         if (ctx->input_field != NULL) {
+            strncpy(req.body.request_post_auth_message_response.response, gtk_entry_get_text((GtkEntry*)ctx->input_field), 127);
+         }
+         handle_response(roundtrip(req), 0);
+         break;
       case QuestionTypeInfo:
-      case QuestionTypeError: {
-                                 struct request req = {
-                                    .request_type = request_type_post_auth_message_response,
-                                 };
-                                 req.body.request_post_auth_message_response.response[0] = '\0';
-                                 handle_response(roundtrip(req), 0);
-                                 break;
-                              }
+      case QuestionTypeError: 
+         req.request_type = request_type_post_auth_message_response;
+         req.body.request_post_auth_message_response.response[0] = '\0';
+         handle_response(roundtrip(req), 0);
+         break;
    }
 }
 
@@ -106,9 +89,7 @@ void action_cancel_question(GtkWidget *widget, gpointer data) {
       .request_type = request_type_cancel_session,
    };
    struct response resp = roundtrip(req);
-   if (resp.response_type != response_type_success) {
-      exit(1);
-   }
+   if (resp.response_type != response_type_success) exit(1);
 
    greeter_setup_question(greeter, QuestionTypeInitial, greeter_get_initial_question(), NULL);
 }

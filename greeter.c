@@ -66,9 +66,9 @@ greeter_setup_question(struct SimpleGreeter *greeter, enum QuestionType type, ch
    }
    greeter->question_type = type;
    if (question != NULL)
-      greeter->question = strdup(question);
+      greeter->question = g_strdup(question);
    if (error != NULL)
-      greeter->error = strdup(error);
+      greeter->error = g_strdup(error);
    greeter->question_cnt += 1;
    
    for (guint idx = 0; idx < greeter->windows->len; idx++) {
