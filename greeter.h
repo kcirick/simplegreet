@@ -32,19 +32,20 @@ struct SimpleGreeter {
    char *question;
    char *error;
    char time[64];
+   int question_cnt;
 };
 
 extern struct SimpleGreeter *greeter;
 
-struct Window* greeter_window_by_widget(struct SimpleGreeter *, GtkWidget *);
-struct Window* greeter_window_by_monitor(struct SimpleGreeter *, GdkMonitor *);
-void greeter_remove_window_by_widget(struct SimpleGreeter *, GtkWidget *);
-void greeter_focus_window(struct SimpleGreeter *, struct Window *);
-void greeter_setup_question(struct SimpleGreeter *, enum QuestionType, char *, char *);
-void greeter_update_clock(struct SimpleGreeter *);
+struct Window* greeter_window_by_widget(struct SimpleGreeter *greeter, GtkWidget *window);
+struct Window* greeter_window_by_monitor(struct SimpleGreeter *greeter, GdkMonitor *monitor);
+void greeter_remove_window_by_widget(struct SimpleGreeter *greeter, GtkWidget *widget);
+void greeter_focus_window(struct SimpleGreeter *greeter, struct Window* win);
+void greeter_setup_question(struct SimpleGreeter *greeter, enum QuestionType type, char* question, char* error);
+void greeter_update_clocks(struct SimpleGreeter *greeter);
 struct SimpleGreeter* create_greeter();
-void greeter_activate(struct SimpleGreeter *);
-void greeter_destroy(struct SimpleGreeter *);
+void greeter_activate(struct SimpleGreeter *greeter);
+void greeter_destroy(struct SimpleGreeter *greeter);
 char* greeter_get_initial_question();
 
 #endif

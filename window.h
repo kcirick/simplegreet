@@ -3,7 +3,7 @@
 
 #include <gtk/gtk.h>
 
-// Defined in greeter.h
+// Defined in gtkgreet.h
 enum QuestionType;
 
 struct Window {
@@ -11,25 +11,26 @@ struct Window {
 
    GtkWidget *window;
    GtkWidget *window_box;
-   
+
    GtkWidget *top_box;
-   GtkWidget *power_label;
    GtkWidget *clock_label;
+   GtkWidget *power_label;
    GtkWidget *command_selector;
 
    GtkWidget *body_box;
    GtkWidget *input_box;
-   GtkWidget *username_field;
-   GtkWidget *password_field;
-   
+   GtkWidget *input_field;
+
 #ifdef LAYER_SHELL
    gulong enter_notify_handler;
 #endif
+
+   int question_cnt;
 };
 
 struct Window *create_window(GdkMonitor *monitor);
 void window_configure(struct Window *win);
-//void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error);
+void window_setup_question(struct Window *ctx, enum QuestionType type, char* question, char* error);
 void window_update_clock(struct Window *ctx);
 void window_swap_focus(struct Window *win, struct Window *old);
 

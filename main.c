@@ -4,7 +4,6 @@
 #include "window.h"
 #include "greeter.h"
 
-
 struct SimpleGreeter *greeter = NULL;
 
 static char* command = NULL;
@@ -15,7 +14,7 @@ static char* style = NULL;
 static gboolean use_layer_shell = FALSE;
 #endif
 
-static GOptionEntry entries[] ={
+static GOptionEntry entries[] = {
 #ifdef LAYER_SHELL
   { "layer-shell", 'l', 0, G_OPTION_ARG_NONE, &use_layer_shell, "Use layer shell", NULL},
 #endif
@@ -58,9 +57,8 @@ reload_outputs()
    for (guint idx = 0; idx < dead_windows->len; idx++) {
       struct Window *w = g_array_index(dead_windows, struct Window*, idx);
       gtk_widget_destroy(w->window);
-      if (greeter->focused_window == w) {
+      if (greeter->focused_window == w)
          greeter->focused_window = NULL;
-      }
    }
 
    for (guint idx = 0; idx < greeter->windows->len; idx++) {
@@ -71,27 +69,26 @@ reload_outputs()
    g_array_unref(dead_windows);
 }
 
-//static void 
-//monitors_changed(GdkDisplay *display, GdkMonitor *monitor) 
-//{
-//   reload_outputs();
-//}
+static void 
+monitors_changed(GdkDisplay *display, GdkMonitor *monitor) 
+{
+   reload_outputs();
+}
 
 static gboolean 
 setup_layer_shell() 
 {
    if (greeter->use_layer_shell) {
       reload_outputs();
-      //GdkDisplay *display = gdk_display_get_default();
-      //g_signal_connect(display, "monitor-added", G_CALLBACK(monitors_changed), NULL);
-      //g_signal_connect(display, "monitor-removed", G_CALLBACK(monitors_changed), NULL);
+      GdkDisplay *display = gdk_display_get_default();
+      g_signal_connect(display, "monitor-added", G_CALLBACK(monitors_changed), NULL);
+      g_signal_connect(display, "monitor-removed", G_CALLBACK(monitors_changed), NULL);
       return TRUE;
-   } else return FALSE;
+   } else 
+      return FALSE;
 }
 #else
-static gboolean 
-setup_layer_shell() 
-{
+static gboolean setup_layer_shell() {
    return FALSE;
 }
 #endif
@@ -124,12 +121,11 @@ attach_custom_style(const char* path)
    g_object_unref(provider);
 }
 
-//--- Main function ------------------------------------------------------
 int 
 main (int argc, char **argv) 
 {
    GError *error = NULL;
-   GOptionContext *option_context = g_option_context_new("- Simple gtk3 greeter for greetd");
+   GOptionContext *option_context = g_option_context_new("- GTK-based greeter for greetd");
    g_option_context_add_main_entries(option_context, entries, NULL);
    g_option_context_add_group(option_context, gtk_get_option_group(TRUE));
    if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
@@ -150,7 +146,7 @@ main (int argc, char **argv)
          g_print("background loading failed: %s\n", error->message);
    }
 
-   if (style != NULL)
+   if (style != NULL) 
       attach_custom_style(style);
 
    g_signal_connect(greeter->app, "activate", G_CALLBACK(activate), NULL);
