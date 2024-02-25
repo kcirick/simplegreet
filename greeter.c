@@ -44,9 +44,9 @@ greeter_remove_window_by_widget(struct SimpleGreeter *greeter, GtkWidget *widget
 void 
 greeter_focus_window(struct SimpleGreeter *greeter, struct Window* win) 
 {
-    //struct Window *old = gtkgreet->focused_window;
+    struct Window *old = greeter->focused_window;
     greeter->focused_window = win;
-    //window_swap_focus(win, old);
+    window_swap_focus(win, old);
     for (guint idx = 0; idx < greeter->windows->len; idx++) {
         struct Window *ctx = g_array_index(greeter->windows, struct Window*, idx);
         window_configure(ctx);

@@ -78,7 +78,39 @@ window_setup_body(struct Window *ctx, enum QuestionType type, char* question, ch
    }
 
    ctx->input_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-   
+
+   GtkWidget *question_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+   gtk_widget_set_halign(question_box, GTK_ALIGN_END);
+   GtkWidget *label;
+   switch (type) {
+      case QuestionTypeInitial:
+      case QuestionTypeVisible:
+      case QuestionTypeSecret:
+         label = gtk_label_new(question);
+         gtk_widget_set_halign(label, GTK_ALIGN_END);
+         gtk_container_add(GTK_CONTAINER(question_box), label);
+
+         ctx->username_field = gtk_entry_new();
+         gtk_widget_set_name(ctx->username_field, "input-field");
+         if (type == QuestionTypeSecret) {
+            gtk_entry_set_input_purpose((GtkEntry*)ctx->username_field, GTK_INPUT_PURPOSE_PASSWORD);
+            gtk_entry_set_visibility((GtkEntry*)ctx->username_field, FALSE);
+         }
+         g_signal_connect(ctx->username_field, "activate", G_CALLBACK(action_answer_question), ctx);
+         gtk_widget_set_size_request(ctx->username_field, 384, -1);
+         gtk_widget_set_halign(ctx->username_field, GTK_ALIGN_END);
+         gtk_container_add(GTK_CONTAINER(question_box), ctx->username_field);
+         break;
+      case QuestionTypeInfo:
+      case QuestionTypeError: 
+         label = gtk_label_new(question);
+         gtk_widget_set_halign(label, GTK_ALIGN_END);
+         gtk_container_add(GTK_CONTAINER(question_box), label);
+         break;
+   }
+
+   gtk_container_add(GTK_CONTAINER(ctx->input_box), question_box);
+   /*
    // User name
    GtkWidget *username_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
    gtk_widget_set_halign(username_box, GTK_ALIGN_END);
@@ -113,7 +145,8 @@ window_setup_body(struct Window *ctx, enum QuestionType type, char* question, ch
       gtk_container_add(GTK_CONTAINER(password_box), ctx->password_field);
 
       gtk_container_add(GTK_CONTAINER(ctx->input_box), password_box);
-   }
+   }*/
+
 
    gtk_container_add(GTK_CONTAINER(ctx->body_box), ctx->input_box);
 
@@ -128,6 +161,13 @@ window_setup_body(struct Window *ctx, enum QuestionType type, char* question, ch
       GtkWidget *label = gtk_label_new(error);
       char err[128];
       snprintf(err, 128, "<span color=\"red\">%s</span>", error);
+      gtk_label_set_markup((GtkLabel*)label, err);
+      gtk_widget_set_halign(label, GTK_ALIGN_END);
+      gtk_container_add(GTK_CONTAINER(button_box), label);
+   } else {
+      GtkWidget *label = gtk_label_new(error);
+      char err[128];
+      snprintf(err, 128, "<span color=\"blue\">%d</span>", type);
       gtk_label_set_markup((GtkLabel*)label, err);
       gtk_widget_set_halign(label, GTK_ALIGN_END);
       gtk_container_add(GTK_CONTAINER(button_box), label);

@@ -17,6 +17,8 @@ handle_response(struct response resp, int start_req)
          if (start_req)
             exit(0);
          
+         if (!greeter->selected_command) return;
+
          req.request_type = request_type_start_session;
          strncpy(req.body.request_start_session.cmd, greeter->selected_command, 127);
          handle_response(roundtrip(req), 1);
@@ -77,7 +79,7 @@ action_answer_question(GtkWidget *widget, gpointer data)
       case QuestionTypeVisible: 
          req.request_type = request_type_post_auth_message_response;
          if (ctx->password_field != NULL) {
-            strncpy(req.body.request_post_auth_message_response.response, gtk_entry_get_text((GtkEntry*)ctx->password_field), 127);
+            strncpy(req.body.request_post_auth_message_response.response, gtk_entry_get_text((GtkEntry*)ctx->username_field), 127);
          }
          handle_response(roundtrip(req), 0);
          break;
