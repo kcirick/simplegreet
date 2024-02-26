@@ -24,6 +24,7 @@ executable (
   'simplegreet',
   [ 'main.c',
     'proto.c',
+    'config.c',
     'actions.c',
     'window.c',
     'greeter.c'

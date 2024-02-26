@@ -4,6 +4,8 @@
 #include "window.h"
 #include "greeter.h"
 
+#include "config.h"
+
 struct SimpleGreeter *greeter = NULL;
 
 static char* command = NULL;
@@ -130,6 +132,8 @@ main (int argc, char **argv)
       g_print("option parsing failed: %s\n", error->message);
       exit(1);
    }
+
+   get_sessions();
 
    greeter = create_greeter();
 

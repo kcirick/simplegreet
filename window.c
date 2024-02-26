@@ -96,7 +96,7 @@ window_setup_input_box(struct Window *ctx, enum QuestionType type, char* questio
             gtk_entry_set_visibility((GtkEntry*)ctx->input_field, FALSE);
          }
          g_signal_connect(ctx->input_field, "activate", G_CALLBACK(action_answer_question), ctx);
-         gtk_widget_set_size_request(ctx->input_field, 300, -1);
+         gtk_widget_set_size_request(ctx->input_field, 250, -1);
          gtk_widget_set_halign(ctx->input_field, GTK_ALIGN_END);
          gtk_container_add(GTK_CONTAINER(question_box), ctx->input_field);
          break;
@@ -176,13 +176,13 @@ window_setup_top_box(struct Window *ctx)
    window_update_clock(ctx);
 
    // command selector
-   ctx->command_selector = gtk_combo_box_text_new_with_entry();
+   ctx->command_selector = gtk_combo_box_text_new();
    gtk_widget_set_name(ctx->command_selector, "command_selector");
    //gtk_widget_set_size_request(ctx->command_selector, 384, -1);
-   //config_update_command_selector(ctx->command_selector);
-   gtk_combo_box_text_append((GtkComboBoxText*)ctx->command_selector, NULL, greeter->command);
+   config_update_command_selector(ctx->command_selector, TRUE);
+   //gtk_combo_box_text_append((GtkComboBoxText*)ctx->command_selector, NULL, greeter->command);
    gtk_widget_set_halign(ctx->command_selector, GTK_ALIGN_END);
-   gtk_combo_box_set_active((GtkComboBox*)ctx->command_selector, 0);
+   //gtk_combo_box_set_active((GtkComboBox*)ctx->command_selector, 0);
 
    GtkWidget *selector_entry = gtk_bin_get_child((GtkBin*)ctx->command_selector);
    gtk_entry_set_placeholder_text((GtkEntry*)selector_entry, "Command to run on login");
@@ -232,7 +232,7 @@ window_setup(struct Window *ctx)
          gtk_widget_set_halign(ctx->body_box, GTK_ALIGN_CENTER);
          gtk_widget_set_valign(ctx->body_box, GTK_ALIGN_CENTER);
          gtk_widget_set_name(ctx->body_box, "body_box");
-         gtk_widget_set_size_request(ctx->body_box, 300, -1);
+         gtk_widget_set_size_request(ctx->body_box, 250, -1);
          gtk_container_add(GTK_CONTAINER(ctx->window_box), ctx->body_box);
       }
 
