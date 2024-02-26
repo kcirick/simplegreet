@@ -69,7 +69,6 @@ get_sessions ()
       char id[32];
       char value[128];
       char* token;
-      //fprintf(stdout, "File = %s\n", filename_qfd);
       while(fgets(buffer, sizeof buffer, f)){
 
          if(buffer[0]=='\n' || buffer[0]=='#' || buffer[0]=='[') continue;
@@ -85,7 +84,7 @@ get_sessions ()
          if(!strcmp(id, "Name")) strcpy(session_names[nsessions], value);
          if(!strcmp(id, "Exec")) strcpy(session_commands[nsessions], value);
       }
-      fprintf(stdout, "Session %d : name = %s / command = %s\n", nsessions, session_names[nsessions], session_commands[nsessions]);
+      //fprintf(stdout, "Session %d : name = %s / command = %s\n", nsessions, session_names[nsessions], session_commands[nsessions]);
       nsessions++;
 
       fclose(f);
@@ -119,12 +118,13 @@ char *
 config_get_command_from_selector(GtkWidget *combobox, gboolean save_session)
 {
    int id = gtk_combo_box_get_active((GtkComboBox*)combobox);
-   fprintf(stdout, "Selected command = %s\n", session_commands[id]);
+   char* command = g_strdup(session_commands[id]);
+   fprintf(stdout, "Selected command = %s\n", command);
 
    if(save_session)
       config_write_last_session(session_names[id]);
 
-   return session_commands[id];
+   return command;
 }
 
 void

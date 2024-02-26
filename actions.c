@@ -7,6 +7,7 @@
 #include "proto.h"
 #include "greeter.h"
 #include "window.h"
+#include "config.h"
 
 static void handle_response(struct response resp, int start_req) {
    struct request req;
@@ -59,8 +60,7 @@ void action_answer_question(GtkWidget *widget, gpointer data) {
             free(greeter->selected_command);
             greeter->selected_command = NULL;
          }
-         char* scommand = config_get_command_from_selector(ctx->command_selector, TRUE);
-         greeter->selected_command = g_strdup(scommand);
+         greeter->selected_command = config_get_command_from_selector(ctx->command_selector, TRUE);
          //greeter->selected_command = g_strdup(gtk_combo_box_text_get_active_text((GtkComboBoxText*)ctx->command_selector));
 
          req.request_type = request_type_create_session;
